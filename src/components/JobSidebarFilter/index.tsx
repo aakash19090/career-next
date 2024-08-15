@@ -1,14 +1,18 @@
 import { redirect } from 'next/navigation';
 
 import { JOBTYPES } from '@/constants';
-import { JobFilterFormSchema } from '@/zodSchemas';
+import { JobFilterFormSchema, JobFilterFormType } from '@/zodSchemas';
 
+import FormSubmitButton from '@/components/FormSubmitButton';
 import Select from '@/components/Select';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
 import prisma from '@/lib/prisma';
+
+interface IJobSidebarFilterProps {
+    defaultValues: JobFilterFormType;
+}
 
 const handleFilterSubmit = async (formData: FormData) => {
     'use server';
@@ -29,7 +33,7 @@ const handleFilterSubmit = async (formData: FormData) => {
     redirect(`/?${searchParams.toString()}`);
 };
 
-const JobSidebarFilter = async () => {
+const JobSidebarFilter = async ({ defaultValues }: IJobSidebarFilterProps) => {
     const distinctLocations = (await prisma.job
         .findMany({ where: { approved: true }, select: { location: true }, distinct: ['location'] })
         .then((locations) => locations.map(({ location }) => location).filter(Boolean))) as string[];
@@ -40,12 +44,18 @@ const JobSidebarFilter = async () => {
                 <div className='form-wrapper space-y-4'>
                     <div className='space-y-4'>
                         <Label htmlFor='q'>Search</Label>
-                        <Input type='text' placeholder='Title, company, etc.' id='q' name='q' />
+                        <Input
+                            type='text'
+                            placeholder='Title, company, etc.'
+                            id='q'
+                            name='q'
+                            defaultValue={defaultValues.q || ''}
+                        />
                     </div>
 
                     <div className='space-y-4'>
                         <Label htmlFor='type'>Type</Label>
-                        <Select id='type' name='type'>
+                        <Select id='type' name='type' defaultValue={defaultValues.type || ''}>
                             <option value=''>All Types</option>
                             {JOBTYPES.map((type) => (
                                 <option key={type} value={type}>
@@ -57,7 +67,7 @@ const JobSidebarFilter = async () => {
 
                     <div className='space-y-4'>
                         <Label htmlFor='type'>Location</Label>
-                        <Select id='location' name='location'>
+                        <Select id='location' name='location' defaultValue={defaultValues.location || ''}>
                             <option value=''>All locations</option>
                             {distinctLocations.map((location) => (
                                 <option key={location} value={location}>
@@ -73,6 +83,7 @@ const JobSidebarFilter = async () => {
                             id='remote'
                             name='remote'
                             className='mr-2 scale-125 cursor-pointer accent-black'
+                            defaultChecked={defaultValues.remote}
                         />
                         <Label htmlFor='remote' className='cursor-pointer'>
                             Remote Jobs
@@ -80,9 +91,8 @@ const JobSidebarFilter = async () => {
                     </div>
 
                     <div>
-                        <Button type='submit' className='w-full'>
-                            Filter Jobs
-                        </Button>
+                        {/* Client Component */}
+                        <FormSubmitButton className='w-full'> Filter Jobs </FormSubmitButton>
                     </div>
                 </div>
             </form>

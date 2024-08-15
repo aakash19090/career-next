@@ -1,13 +1,26 @@
-import JobListItem from '@/components/JobListItem';
+import { JobFilterFormType } from '@/zodSchemas';
+
+import JobResults from '@/components/JobResults';
 import JobSidebarFilter from '@/components/JobSidebarFilter';
 
-import prisma from '@/lib/prisma';
+// import prisma from '@/lib/prisma';
 
-export default async function Home() {
-    const jobs = await prisma.job.findMany({
-        where: { approved: true },
-        orderBy: { createdAt: 'desc' },
-    });
+interface IPageProps {
+    searchParams: {
+        q?: string;
+        type?: string;
+        location?: string;
+        remote?: string;
+    };
+}
+
+export default async function Home({ searchParams: { q, type, location, remote } }: IPageProps) {
+    const filterValues: JobFilterFormType = {
+        q,
+        type,
+        location,
+        remote: remote === 'true',
+    };
 
     return (
         <main className='m-auto max-w-5xl px-3'>
@@ -16,12 +29,8 @@ export default async function Home() {
                 <p className='text-muted-foreground'>Find your dream job.</p>
             </div>
             <section className='flex flex-col gap-4 md:flex-row'>
-                <JobSidebarFilter />
-                <div className='grow space-y-4'>
-                    {jobs.map((job) => (
-                        <JobListItem key={job.id} job={job} />
-                    ))}
-                </div>
+                <JobSidebarFilter defaultValues={filterValues} />
+                <JobResults filterValues={filterValues} />
             </section>
         </main>
     );
