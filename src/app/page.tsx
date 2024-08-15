@@ -1,3 +1,5 @@
+import { Metadata } from 'next';
+
 import { JobFilterFormType } from '@/zodSchemas';
 
 import JobResults from '@/components/JobResults';
@@ -14,6 +16,34 @@ interface IPageProps {
     };
 }
 
+const getPageTitle = ({ q, type, location, remote }: JobFilterFormType) => {
+    const titlePrefix = q
+        ? `${q} jobs`
+        : type
+          ? `${type} developer jobs`
+          : remote
+            ? 'Remote developer jobs'
+            : 'All Developer jobs';
+
+    const titleSuffix = location ? ` in ${location}` : '';
+
+    return `${titlePrefix}${titleSuffix}`;
+};
+
+// Generate MetaData for SEO
+export function generateMetadata({ searchParams: { q, type, location, remote } }: IPageProps): Metadata {
+    const filterValues: JobFilterFormType = {
+        q,
+        type,
+        location,
+        remote: remote === 'true',
+    };
+    return {
+        title: `${getPageTitle(filterValues)} | Career Next`,
+        description: 'Find your dream developer job.',
+    };
+}
+
 export default async function Home({ searchParams: { q, type, location, remote } }: IPageProps) {
     const filterValues: JobFilterFormType = {
         q,
@@ -23,9 +53,9 @@ export default async function Home({ searchParams: { q, type, location, remote }
     };
 
     return (
-        <main className='m-auto max-w-5xl px-3'>
+        <main className='m-auto my-10 max-w-5xl space-y-10 px-3'>
             <div className='space-y-5 text-center'>
-                <h1 className='text-4xl font-extrabold tracking-tight lg:text-5xl'>Developer jobs</h1>
+                <h1 className='text-4xl font-extrabold tracking-tight lg:text-5xl'> {getPageTitle(filterValues)} </h1>
                 <p className='text-muted-foreground'>Find your dream job.</p>
             </div>
             <section className='flex flex-col gap-4 md:flex-row'>

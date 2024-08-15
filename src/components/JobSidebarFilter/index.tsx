@@ -40,7 +40,8 @@ const JobSidebarFilter = async ({ defaultValues }: IJobSidebarFilterProps) => {
 
     return (
         <aside className='sticky top-0 h-fit rounded-lg border bg-background p-4 md:w-72'>
-            <form action={handleFilterSubmit}>
+            {/* Note the use of key in <form>, this is used to reset form to original state when we click on Logo */}
+            <form action={handleFilterSubmit} key={JSON.stringify(defaultValues)}>
                 <div className='form-wrapper space-y-4'>
                     <div className='space-y-4'>
                         <Label htmlFor='q'>Search</Label>
